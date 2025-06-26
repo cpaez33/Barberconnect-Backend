@@ -15,7 +15,27 @@ import cors from "cors";
 import morgan from "morgan";
 
 // app.use(cors({ origin: process.env.CORS_ORIGIN ?? /localhost/ }));
-app.use(cors());
+// app.use(cors());
+
+// parse comma-separated origins into an array
+const allowedOrigins = process.env.CORS_ORIGIN
+  ? process.env.CORS_ORIGIN.split(",")
+  : [];
+
+// only allow requests coming from your Netlify app (or localhost during dev)
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      // browser may send no origin (e.g. mobile clients, curl)
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+    credentials: true,
+  })
+);
 
 app.use(morgan("dev"));
 
